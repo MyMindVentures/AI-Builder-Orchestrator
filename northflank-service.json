@@ -1,0 +1,79 @@
+{
+  "name": "ai-builder-orchestrator",
+  "description": "AI Builder Orchestrator - Central hub for coordinating autonomous AI development agents like Devin, Cursor, and other AI Builders",
+  "serviceType": "combined",
+  "source": {
+    "type": "git",
+    "projectUrl": "https://github.com/MyMindVentures/AI-Builder-Orchestrator",
+    "projectType": "github",
+    "projectBranch": "main",
+    "buildType": "dockerfile",
+    "dockerfile": "Dockerfile"
+  },
+  "buildSettings": {
+    "buildType": "dockerfile",
+    "dockerfile": {
+      "dockerFilePath": "/Dockerfile",
+      "dockerWorkDir": "/"
+    }
+  },
+  "deployment": {
+    "instances": 2,
+    "plan": "nf-compute-100-1"
+  },
+  "billing": {
+    "buildPlan": "nf-compute-400-16",
+    "deploymentPlan": "nf-compute-100-1"
+  },
+  "vcsData": {
+    "projectUrl": "https://github.com/MyMindVentures/AI-Builder-Orchestrator",
+    "projectType": "github",
+    "projectBranch": "main"
+  },
+  "networking": {
+    "ports": [
+      {
+        "name": "http",
+        "port": 3000,
+        "internalPort": 3000,
+        "protocol": "http",
+        "public": true
+      }
+    ]
+  },
+  "environment": {
+    "NODE_ENV": "production",
+    "PORT": "3000",
+    "LOG_LEVEL": "info"
+  },
+  "secrets": {
+    "source": "doppler",
+    "project": "ai-builder-orchestrator",
+    "config": "production"
+  },
+  "healthChecks": {
+    "http": {
+      "path": "/health",
+      "port": 3000,
+      "initialDelaySeconds": 30,
+      "periodSeconds": 10,
+      "timeoutSeconds": 5,
+      "failureThreshold": 3
+    }
+  },
+  "resources": {
+    "requests": {
+      "cpu": "100m",
+      "memory": "256Mi"
+    },
+    "limits": {
+      "cpu": "500m",
+      "memory": "512Mi"
+    }
+  },
+  "scaling": {
+    "minReplicas": 1,
+    "maxReplicas": 5,
+    "targetCPUUtilizationPercentage": 70
+  }
+}
