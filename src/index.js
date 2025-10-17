@@ -15,6 +15,7 @@ import { DatabaseManager } from './database/database.js';
 import { OrchestrationService } from './orchestrator/orchestration.js';
 import { AgentManager } from './agents/agent-manager.js';
 import { TaskQueue } from './services/task-queue.js';
+import { AIKnowledgeExtractor } from './services/ai-knowledge-extractor.js';
 
 // Load environment variables
 dotenv.config();
@@ -61,6 +62,7 @@ class AIBuilderOrchestrator {
       this.agentManager
     );
     this.taskQueue = new TaskQueue();
+    this.knowledgeExtractor = new AIKnowledgeExtractor();
 
     this.setupHandlers();
     this.setupExpress();
@@ -254,6 +256,92 @@ class AIBuilderOrchestrator {
               required: ['project_id'],
             },
           },
+          {
+            name: 'extract_tool_knowledge',
+            description: 'Extract comprehensive knowledge about a tool from official documentation and community sources',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                tool_name: {
+                  type: 'string',
+                  description: 'Name of the tool to extract knowledge about (e.g., NorthFlank, React, Docker)',
+                },
+                extraction_options: {
+                  type: 'object',
+                  description: 'Options for knowledge extraction',
+                  properties: {
+                    include_community: { type: 'boolean', default: true },
+                    include_best_practices: { type: 'boolean', default: true },
+                    include_optimization: { type: 'boolean', default: true },
+                    max_sources: { type: 'number', default: 20 },
+                  },
+                },
+              },
+              required: ['tool_name'],
+            },
+          },
+          {
+            name: 'extract_multiple_tools_knowledge',
+            description: 'Extract knowledge about multiple tools simultaneously',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                tools: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Array of tool names to extract knowledge about',
+                },
+                extraction_options: {
+                  type: 'object',
+                  description: 'Options for knowledge extraction',
+                  properties: {
+                    include_community: { type: 'boolean', default: true },
+                    include_best_practices: { type: 'boolean', default: true },
+                    include_optimization: { type: 'boolean', default: true },
+                    max_sources_per_tool: { type: 'number', default: 15 },
+                  },
+                },
+              },
+              required: ['tools'],
+            },
+          },
+          {
+            name: 'get_knowledge_extraction_status',
+            description: 'Get the status of a knowledge extraction job',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                job_id: {
+                  type: 'string',
+                  description: 'ID of the extraction job to check',
+                },
+              },
+              required: ['job_id'],
+            },
+          },
+          {
+            name: 'search_knowledge_base',
+            description: 'Search the knowledge base for specific information',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                query: {
+                  type: 'string',
+                  description: 'Search query for the knowledge base',
+                },
+                filters: {
+                  type: 'object',
+                  description: 'Filters for the search',
+                  properties: {
+                    tool_name: { type: 'string' },
+                    category: { type: 'string' },
+                    source: { type: 'string' },
+                  },
+                },
+              },
+              required: ['query'],
+            },
+          },
         ],
       };
     });
@@ -287,6 +375,18 @@ class AIBuilderOrchestrator {
 
           case 'deploy_autonomous_system':
             return await this.orchestrationService.deployAutonomousSystem(args);
+
+          case 'extract_tool_knowledge':
+            return await this.handleExtractToolKnowledge(args);
+
+          case 'extract_multiple_tools_knowledge':
+            return await this.handleExtractMultipleToolsKnowledge(args);
+
+          case 'get_knowledge_extraction_status':
+            return await this.handleGetKnowledgeExtractionStatus(args);
+
+          case 'search_knowledge_base':
+            return await this.handleSearchKnowledgeBase(args);
 
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -372,6 +472,149 @@ class AIBuilderOrchestrator {
         res.status(500).json({ error: 'Internal server error' });
       }
     });
+  }
+
+  // AI Knowledge Extractor handlers
+  async handleExtractToolKnowledge(args) {
+    try {
+      const { tool_name, extraction_options = {} } = args;
+      const result = await this.knowledgeExtractor.extractKnowledgeFromTool(tool_name, extraction_options);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Knowledge extraction started for ${tool_name}. Job ID: ${result.id}. Status: ${result.status}. Progress: ${result.progress}%`,
+          },
+        ],
+      };
+    } catch (error) {
+      logger.error('Error extracting tool knowledge:', error);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error extracting knowledge for ${args.tool_name}: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+
+  async handleExtractMultipleToolsKnowledge(args) {
+    try {
+      const { tools, extraction_options = {} } = args;
+      const results = await this.knowledgeExtractor.extractMultipleTools(tools, extraction_options);
+      
+      const summary = results.map(result => 
+        `${result.toolName || result.tool_name}: ${result.status}${result.error ? ` (${result.error})` : ''}`
+      ).join('\n');
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Multiple tools knowledge extraction completed:\n${summary}`,
+          },
+        ],
+      };
+    } catch (error) {
+      logger.error('Error extracting multiple tools knowledge:', error);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error extracting knowledge for multiple tools: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+
+  async handleGetKnowledgeExtractionStatus(args) {
+    try {
+      const { job_id } = args;
+      const status = this.knowledgeExtractor.getJobStatus(job_id);
+      
+      if (!status) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Job ${job_id} not found`,
+            },
+          ],
+        };
+      }
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Job ${job_id} Status: ${status.status}\nProgress: ${status.progress}%\nStarted: ${status.startedAt}${status.completedAt ? `\nCompleted: ${status.completedAt}` : ''}${status.errors.length > 0 ? `\nErrors: ${status.errors.join(', ')}` : ''}`,
+          },
+        ],
+      };
+    } catch (error) {
+      logger.error('Error getting knowledge extraction status:', error);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error getting status for job ${args.job_id}: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+
+  async handleSearchKnowledgeBase(args) {
+    try {
+      const { query, filters = {} } = args;
+      
+      // This would integrate with the Hybrid Knowledge Base
+      const searchResults = await this.searchKnowledgeBase(query, filters);
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Knowledge Base Search Results for "${query}":\n\n${searchResults.map(result => 
+              `• ${result.title}\n  ${result.content.substring(0, 200)}...\n  Source: ${result.source}\n`
+            ).join('\n')}`,
+          },
+        ],
+      };
+    } catch (error) {
+      logger.error('Error searching knowledge base:', error);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error searching knowledge base: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+
+  async searchKnowledgeBase(query, filters) {
+    // This would make an API call to the Hybrid Knowledge Base
+    // For now, return mock results
+    return [
+      {
+        title: `${query} - Best Practices`,
+        content: `Comprehensive best practices and optimization strategies for ${query}`,
+        source: 'official_documentation',
+        relevance: 0.95
+      },
+      {
+        title: `${query} - Community Insights`,
+        content: `Community insights and real-world usage patterns for ${query}`,
+        source: 'community',
+        relevance: 0.88
+      }
+    ];
   }
 
   async start() {

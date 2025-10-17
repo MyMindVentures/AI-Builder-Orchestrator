@@ -1,0 +1,62 @@
+{
+  "name": "ai-knowledge-extractor-job",
+  "description": "AI Knowledge Extractor Job - Deep search and extraction of tool documentation and best practices",
+  "jobType": "scheduled",
+  "schedule": "0 2 * * *",
+  "billing": {
+    "buildPlan": "nf-compute-200-4",
+    "deploymentPlan": "nf-compute-100-1"
+  },
+  "deployment": {
+    "instances": 1,
+    "resources": {
+      "cpu": "200m",
+      "memory": "512Mi"
+    }
+  },
+  "buildSettings": {
+    "dockerfile": {
+      "dockerFilePath": "/Dockerfile",
+      "dockerWorkDir": "/"
+    }
+  },
+  "source": {
+    "type": "git",
+    "projectUrl": "https://github.com/MyMindVentures/AI-Builder-Orchestrator",
+    "projectType": "github",
+    "projectBranch": "main",
+    "buildType": "dockerfile",
+    "dockerfile": "Dockerfile"
+  },
+  "environment": {
+    "NODE_ENV": "production",
+    "KNOWLEDGE_BASE_URL": "https://http--hybrid-knowledge-base--nl76nv6p7k89.code.run",
+    "EXTRACTION_TOOLS": "NorthFlank,React,Docker,Node.js,Express,MongoDB,Redis,PostgreSQL,Neo4j,FAISS",
+    "SCHEDULE_TYPE": "daily",
+    "MAX_CONCURRENT_EXTRACTIONS": "3"
+  },
+  "healthCheck": {
+    "path": "/health",
+    "port": 3004,
+    "interval": 30
+  },
+  "scaling": {
+    "minInstances": 0,
+    "maxInstances": 1,
+    "targetCPU": 70
+  },
+  "vcsData": {
+    "projectUrl": "https://github.com/MyMindVentures/AI-Builder-Orchestrator",
+    "projectType": "github",
+    "projectBranch": "main"
+  },
+  "jobConfig": {
+    "timeout": "30m",
+    "retries": 3,
+    "restartPolicy": "OnFailure",
+    "successCriteria": {
+      "exitCode": 0,
+      "outputContains": "Knowledge extraction completed successfully"
+    }
+  }
+}

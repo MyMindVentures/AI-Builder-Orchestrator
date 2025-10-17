@@ -46,4 +46,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Start the application
 ENTRYPOINT ["dumb-init", "--"]
+
+# Default to running the orchestrator service
+# For jobs, override with: CMD ["node", "src/jobs/knowledge-extraction-job.js"]
 CMD ["node", "src/index.js"]
