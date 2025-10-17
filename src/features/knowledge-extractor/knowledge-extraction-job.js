@@ -42,7 +42,7 @@ class KnowledgeExtractionJob {
       'MCP',
       'GitHub Actions',
       'Kubernetes',
-      'Nginx'
+      'Nginx',
     ];
   }
 
@@ -52,31 +52,38 @@ class KnowledgeExtractionJob {
 
     try {
       const results = [];
-      const maxConcurrent = parseInt(process.env.MAX_CONCURRENT_EXTRACTIONS) || 3;
+      const maxConcurrent =
+        parseInt(process.env.MAX_CONCURRENT_EXTRACTIONS) || 3;
 
       // Process tools in batches to avoid overwhelming the system
       for (let i = 0; i < this.toolsToExtract.length; i += maxConcurrent) {
         const batch = this.toolsToExtract.slice(i, i + maxConcurrent);
-        logger.info(`🔄 Processing batch ${Math.floor(i / maxConcurrent) + 1}: ${batch.join(', ')}`);
+        logger.info(
+          `🔄 Processing batch ${
+            Math.floor(i / maxConcurrent) + 1
+          }: ${batch.join(', ')}`
+        );
 
-        const batchPromises = batch.map(async (tool) => {
+        const batchPromises = batch.map(async tool => {
           try {
             logger.info(`🔍 Extracting knowledge for: ${tool}`);
             const result = await this.extractor.extractKnowledgeFromTool(tool, {
               include_community: true,
               include_best_practices: true,
               include_optimization: true,
-              max_sources: 20
+              max_sources: 20,
             });
-            
-            logger.info(`✅ Completed extraction for ${tool}: ${result.status}`);
+
+            logger.info(
+              `✅ Completed extraction for ${tool}: ${result.status}`
+            );
             return result;
           } catch (error) {
             logger.error(`❌ Failed extraction for ${tool}:`, error.message);
             return {
               toolName: tool,
               status: 'failed',
-              error: error.message
+              error: error.message,
             };
           }
         });
@@ -98,8 +105,10 @@ class KnowledgeExtractionJob {
       // Log final results
       const successful = results.filter(r => r.status === 'completed').length;
       const failed = results.filter(r => r.status === 'failed').length;
-      
-      logger.info(`🎯 Job completed: ${successful} successful, ${failed} failed`);
+
+      logger.info(
+        `🎯 Job completed: ${successful} successful, ${failed} failed`
+      );
 
       if (failed === 0) {
         logger.info('🎉 All extractions completed successfully!');
@@ -108,7 +117,6 @@ class KnowledgeExtractionJob {
         logger.warn(`⚠️  ${failed} extractions failed`);
         process.exit(1);
       }
-
     } catch (error) {
       logger.error('💥 Job failed with error:', error);
       process.exit(1);
@@ -120,7 +128,7 @@ class KnowledgeExtractionJob {
       total: results.length,
       successful: results.filter(r => r.status === 'completed').length,
       failed: results.filter(r => r.status === 'failed').length,
-      tools: {}
+      tools: {},
     };
 
     results.forEach(result => {
@@ -128,7 +136,7 @@ class KnowledgeExtractionJob {
         status: result.status,
         progress: result.progress || 0,
         error: result.error || null,
-        completedAt: result.completedAt || null
+        completedAt: result.completedAt || null,
       };
     });
 
@@ -137,15 +145,15 @@ class KnowledgeExtractionJob {
 
   async runSingleTool(toolName) {
     logger.info(`🔍 Running single tool extraction for: ${toolName}`);
-    
+
     try {
       const result = await this.extractor.extractKnowledgeFromTool(toolName, {
         include_community: true,
         include_best_practices: true,
         include_optimization: true,
-        max_sources: 25
+        max_sources: 25,
       });
-      
+
       logger.info(`✅ Single tool extraction completed: ${result.status}`);
       return result;
     } catch (error) {
@@ -156,11 +164,13 @@ class KnowledgeExtractionJob {
 
   async runCustomExtraction(tools, options = {}) {
     logger.info(`🔍 Running custom extraction for: ${tools.join(', ')}`);
-    
+
     try {
       const results = await this.extractor.extractMultipleTools(tools, options);
-      
-      logger.info(`✅ Custom extraction completed: ${results.length} tools processed`);
+
+      logger.info(
+        `✅ Custom extraction completed: ${results.length} tools processed`
+      );
       return results;
     } catch (error) {
       logger.error(`❌ Custom extraction failed:`, error.message);
@@ -172,17 +182,18 @@ class KnowledgeExtractionJob {
 // Main execution
 if (import.meta.url === `file://${process.argv[1]}`) {
   const job = new KnowledgeExtractionJob();
-  
+
   // Check command line arguments
   const args = process.argv.slice(2);
-  
+
   if (args.length > 0) {
     const command = args[0];
-    
+
     switch (command) {
       case 'single':
         if (args[1]) {
-          job.runSingleTool(args[1])
+          job
+            .runSingleTool(args[1])
             .then(() => process.exit(0))
             .catch(() => process.exit(1));
         } else {
@@ -190,23 +201,28 @@ if (import.meta.url === `file://${process.argv[1]}`) {
           process.exit(1);
         }
         break;
-        
+
       case 'custom':
         if (args[1]) {
           const tools = args[1].split(',');
           const options = args[2] ? JSON.parse(args[2]) : {};
-          job.runCustomExtraction(tools, options)
+          job
+            .runCustomExtraction(tools, options)
             .then(() => process.exit(0))
             .catch(() => process.exit(1));
         } else {
-          logger.error('❌ Please provide comma-separated tool names for custom extraction');
+          logger.error(
+            '❌ Please provide comma-separated tool names for custom extraction'
+          );
           process.exit(1);
         }
         break;
-        
+
       default:
         logger.error(`❌ Unknown command: ${command}`);
-        logger.info('Available commands: single <tool>, custom <tools>, or run without arguments for full extraction');
+        logger.info(
+          'Available commands: single <tool>, custom <tools>, or run without arguments for full extraction'
+        );
         process.exit(1);
     }
   } else {

@@ -89,15 +89,22 @@ class AIBuilderOrchestrator {
                   description: 'Context about the project and requirements',
                   properties: {
                     project_type: { type: 'string' },
-                    technology_stack: { type: 'array', items: { type: 'string' } },
-                    priority: { type: 'string', enum: ['low', 'medium', 'high', 'urgent'] },
+                    technology_stack: {
+                      type: 'array',
+                      items: { type: 'string' },
+                    },
+                    priority: {
+                      type: 'string',
+                      enum: ['low', 'medium', 'high', 'urgent'],
+                    },
                     deadline: { type: 'string' },
                     requirements: { type: 'array', items: { type: 'string' } },
                   },
                 },
                 preferred_agent: {
                   type: 'string',
-                  description: 'Preferred AI Builder agent (devin, cursor, claude, gpt-4, auto)',
+                  description:
+                    'Preferred AI Builder agent (devin, cursor, claude, gpt-4, auto)',
                   enum: ['devin', 'cursor', 'claude', 'gpt-4', 'auto'],
                 },
               },
@@ -124,7 +131,8 @@ class AIBuilderOrchestrator {
           },
           {
             name: 'get_ai_builder_status',
-            description: 'Get the current status and capabilities of all AI Builder agents',
+            description:
+              'Get the current status and capabilities of all AI Builder agents',
             inputSchema: {
               type: 'object',
               properties: {
@@ -137,7 +145,8 @@ class AIBuilderOrchestrator {
           },
           {
             name: 'schedule_autonomous_upgrade',
-            description: 'Schedule an autonomous upgrade for a project using AI Builders',
+            description:
+              'Schedule an autonomous upgrade for a project using AI Builders',
             inputSchema: {
               type: 'object',
               properties: {
@@ -148,7 +157,13 @@ class AIBuilderOrchestrator {
                 upgrade_type: {
                   type: 'string',
                   description: 'Type of upgrade to perform',
-                  enum: ['security', 'performance', 'features', 'dependencies', 'architecture'],
+                  enum: [
+                    'security',
+                    'performance',
+                    'features',
+                    'dependencies',
+                    'architecture',
+                  ],
                 },
                 requirements: {
                   type: 'array',
@@ -157,7 +172,8 @@ class AIBuilderOrchestrator {
                 },
                 schedule: {
                   type: 'string',
-                  description: 'When to perform the upgrade (immediate, scheduled, or cron expression)',
+                  description:
+                    'When to perform the upgrade (immediate, scheduled, or cron expression)',
                 },
               },
               required: ['project_id', 'upgrade_type'],
@@ -193,13 +209,15 @@ class AIBuilderOrchestrator {
           },
           {
             name: 'integrate_with_chatbot',
-            description: 'Integrate AI Builder Orchestrator with chatbot systems',
+            description:
+              'Integrate AI Builder Orchestrator with chatbot systems',
             inputSchema: {
               type: 'object',
               properties: {
                 chatbot_platform: {
                   type: 'string',
-                  description: 'Chatbot platform (discord, slack, telegram, webhook)',
+                  description:
+                    'Chatbot platform (discord, slack, telegram, webhook)',
                 },
                 integration_config: {
                   type: 'object',
@@ -215,7 +233,8 @@ class AIBuilderOrchestrator {
           },
           {
             name: 'analyze_project_health',
-            description: 'Analyze project health and suggest autonomous improvements',
+            description:
+              'Analyze project health and suggest autonomous improvements',
             inputSchema: {
               type: 'object',
               properties: {
@@ -226,7 +245,13 @@ class AIBuilderOrchestrator {
                 analysis_type: {
                   type: 'string',
                   description: 'Type of analysis to perform',
-                  enum: ['security', 'performance', 'code_quality', 'dependencies', 'architecture'],
+                  enum: [
+                    'security',
+                    'performance',
+                    'code_quality',
+                    'dependencies',
+                    'architecture',
+                  ],
                 },
               },
               required: ['project_path'],
@@ -234,13 +259,15 @@ class AIBuilderOrchestrator {
           },
           {
             name: 'deploy_autonomous_system',
-            description: 'Deploy an autonomous development system for a project',
+            description:
+              'Deploy an autonomous development system for a project',
             inputSchema: {
               type: 'object',
               properties: {
                 project_id: {
                   type: 'string',
-                  description: 'ID of the project to deploy autonomous system for',
+                  description:
+                    'ID of the project to deploy autonomous system for',
                 },
                 deployment_config: {
                   type: 'object',
@@ -258,13 +285,15 @@ class AIBuilderOrchestrator {
           },
           {
             name: 'extract_tool_knowledge',
-            description: 'Extract comprehensive knowledge about a tool from official documentation and community sources',
+            description:
+              'Extract comprehensive knowledge about a tool from official documentation and community sources',
             inputSchema: {
               type: 'object',
               properties: {
                 tool_name: {
                   type: 'string',
-                  description: 'Name of the tool to extract knowledge about (e.g., NorthFlank, React, Docker)',
+                  description:
+                    'Name of the tool to extract knowledge about (e.g., NorthFlank, React, Docker)',
                 },
                 extraction_options: {
                   type: 'object',
@@ -282,7 +311,8 @@ class AIBuilderOrchestrator {
           },
           {
             name: 'extract_multiple_tools_knowledge',
-            description: 'Extract knowledge about multiple tools simultaneously',
+            description:
+              'Extract knowledge about multiple tools simultaneously',
             inputSchema: {
               type: 'object',
               properties: {
@@ -362,10 +392,14 @@ class AIBuilderOrchestrator {
             return await this.orchestrationService.getAIBuilderStatus(args);
 
           case 'schedule_autonomous_upgrade':
-            return await this.orchestrationService.scheduleAutonomousUpgrade(args);
+            return await this.orchestrationService.scheduleAutonomousUpgrade(
+              args
+            );
 
           case 'create_autonomous_workflow':
-            return await this.orchestrationService.createAutonomousWorkflow(args);
+            return await this.orchestrationService.createAutonomousWorkflow(
+              args
+            );
 
           case 'integrate_with_chatbot':
             return await this.orchestrationService.integrateWithChatbot(args);
@@ -444,7 +478,9 @@ class AIBuilderOrchestrator {
 
     this.app.post('/api/delegate', async (req, res) => {
       try {
-        const result = await this.orchestrationService.delegateToAIBuilder(req.body);
+        const result = await this.orchestrationService.delegateToAIBuilder(
+          req.body
+        );
         res.json(result);
       } catch (error) {
         logger.error('Error delegating task:', error);
@@ -465,7 +501,9 @@ class AIBuilderOrchestrator {
     // Webhook endpoint for chatbot integration
     this.app.post('/webhook/chatbot', async (req, res) => {
       try {
-        const result = await this.orchestrationService.handleChatbotMessage(req.body);
+        const result = await this.orchestrationService.handleChatbotMessage(
+          req.body
+        );
         res.json(result);
       } catch (error) {
         logger.error('Error handling chatbot message:', error);
@@ -478,8 +516,11 @@ class AIBuilderOrchestrator {
   async handleExtractToolKnowledge(args) {
     try {
       const { tool_name, extraction_options = {} } = args;
-      const result = await this.knowledgeExtractor.extractKnowledgeFromTool(tool_name, extraction_options);
-      
+      const result = await this.knowledgeExtractor.extractKnowledgeFromTool(
+        tool_name,
+        extraction_options
+      );
+
       return {
         content: [
           {
@@ -504,12 +545,20 @@ class AIBuilderOrchestrator {
   async handleExtractMultipleToolsKnowledge(args) {
     try {
       const { tools, extraction_options = {} } = args;
-      const results = await this.knowledgeExtractor.extractMultipleTools(tools, extraction_options);
-      
-      const summary = results.map(result => 
-        `${result.toolName || result.tool_name}: ${result.status}${result.error ? ` (${result.error})` : ''}`
-      ).join('\n');
-      
+      const results = await this.knowledgeExtractor.extractMultipleTools(
+        tools,
+        extraction_options
+      );
+
+      const summary = results
+        .map(
+          result =>
+            `${result.toolName || result.tool_name}: ${result.status}${
+              result.error ? ` (${result.error})` : ''
+            }`
+        )
+        .join('\n');
+
       return {
         content: [
           {
@@ -535,7 +584,7 @@ class AIBuilderOrchestrator {
     try {
       const { job_id } = args;
       const status = this.knowledgeExtractor.getJobStatus(job_id);
-      
+
       if (!status) {
         return {
           content: [
@@ -546,12 +595,20 @@ class AIBuilderOrchestrator {
           ],
         };
       }
-      
+
       return {
         content: [
           {
             type: 'text',
-            text: `Job ${job_id} Status: ${status.status}\nProgress: ${status.progress}%\nStarted: ${status.startedAt}${status.completedAt ? `\nCompleted: ${status.completedAt}` : ''}${status.errors.length > 0 ? `\nErrors: ${status.errors.join(', ')}` : ''}`,
+            text: `Job ${job_id} Status: ${status.status}\nProgress: ${
+              status.progress
+            }%\nStarted: ${status.startedAt}${
+              status.completedAt ? `\nCompleted: ${status.completedAt}` : ''
+            }${
+              status.errors.length > 0
+                ? `\nErrors: ${status.errors.join(', ')}`
+                : ''
+            }`,
           },
         ],
       };
@@ -571,17 +628,23 @@ class AIBuilderOrchestrator {
   async handleSearchKnowledgeBase(args) {
     try {
       const { query, filters = {} } = args;
-      
+
       // This would integrate with the Hybrid Knowledge Base
       const searchResults = await this.searchKnowledgeBase(query, filters);
-      
+
       return {
         content: [
           {
             type: 'text',
-            text: `Knowledge Base Search Results for "${query}":\n\n${searchResults.map(result => 
-              `• ${result.title}\n  ${result.content.substring(0, 200)}...\n  Source: ${result.source}\n`
-            ).join('\n')}`,
+            text: `Knowledge Base Search Results for "${query}":\n\n${searchResults
+              .map(
+                result =>
+                  `• ${result.title}\n  ${result.content.substring(
+                    0,
+                    200
+                  )}...\n  Source: ${result.source}\n`
+              )
+              .join('\n')}`,
           },
         ],
       };
@@ -606,14 +669,14 @@ class AIBuilderOrchestrator {
         title: `${query} - Best Practices`,
         content: `Comprehensive best practices and optimization strategies for ${query}`,
         source: 'official_documentation',
-        relevance: 0.95
+        relevance: 0.95,
       },
       {
         title: `${query} - Community Insights`,
         content: `Community insights and real-world usage patterns for ${query}`,
         source: 'community',
-        relevance: 0.88
-      }
+        relevance: 0.88,
+      },
     ];
   }
 
